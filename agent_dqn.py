@@ -47,9 +47,9 @@ class Agent_DQN(Agent):
         super(Agent_DQN,self).__init__(env)
         self.args = args
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.q_net = DuelingDQN().to(self.device)
-        self.target_q_net = DuelingDQN().to(self.device)
+        num_actions = env.action_space.n
+        self.q_net = DuelingDQN(num_actions=num_actions).to(self.device)
+        self.target_q_net = DuelingDQN(num_actions=num_actions).to(self.device)
         self.target_q_net.load_state_dict(self.q_net.state_dict())
         self.optimizer = optim.Adam(self.q_net.parameters(), lr=args.lr, weight_decay=1e-4)
 
@@ -111,6 +111,8 @@ class Agent_DQN(Agent):
         # print("action", torch.argmax(q_values, dim=1).item())
         action = torch.argmax(q_values, dim=1).item()
         # action = max(0, min(action, self.env.action_space.n - 1))
+        # print("Action: ", action)
+        # print("Action_space: ", self.env.action_space.n)
         return action
         # return action
     
@@ -139,7 +141,17 @@ class Agent_DQN(Agent):
         actions = torch.tensor(np.array(actions), dtype=torch.int64).to(self.device)
         rewards = torch.tensor(np.array(rewards), dtype=torch.float32).to(self.device)
         dones = torch.tensor(np.array(dones), dtype=torch.float32).to(self.device)
+        
+        # print(f"States shape: {states.shape}") 
+        # print(f"Actions shape: {actions.shape}") 
+        # print(f"Rewards shape: {rewards.shape}") 
+        # print(f"Next states shape: {next_states.shape}") 
+        # print(f"Dones shape: {dones.shape}")
+        
         # weights = torch.tensor(weights, dtype=torch.float32).to(self.device)
+
+        # q_values = self.q_net(states)
+        # print("Q-values shape:", q_values.shape)
 
         curr_q_values = self.q_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
@@ -182,7 +194,7 @@ class Agent_DQN(Agent):
         
     
     def train_agent(self, num_episodes):
-        wandb.init(project="dqn", name="ddqn", config=self.args, mode=self.args.wandb_mode)
+        wandb.init(project="MsPacman", name="ddqn", config=self.args, mode=self.args.wandb_mode)
         # wandb.log()
         # wandb.log(loss_dict: self.loss_dict)
         
@@ -233,9 +245,9 @@ class Agent_DQN(Agent):
 
             # Save model checkpoint and rewards periodically
             if episode % 1000 == 0:
-                filename = f"{wandb.run.dir}/dqn_{episode}_reward{total_reward}.pth"
+                filename = f"{wandb.run.dir}/dqn_{episode}_reward{self.average_reward_dict[episode]:.2f}.pth"
                 torch.save(self.q_net.state_dict(), filename)
-                wandb.save("dqn_{episode}_reward{total_reward}.pth")
+                wandb.save(f"dqn_{episode}_reward{self.average_reward_dict[episode]:.2f}.pth")
 
             
             if episode % 100 == 0:

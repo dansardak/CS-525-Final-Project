@@ -68,19 +68,24 @@ class DuelingDQN(nn.Module):
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.Conv2d(64, 128, kernel_size=3, stride=1),
             nn.ReLU(),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1),
             nn.Flatten()
         )
 
         self.value_stream = nn.Sequential(
-            nn.Linear(7 * 7 * 64, 512),
+            nn.Linear(5 * 5 * 256, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU(),
             nn.Linear(512, 1)
         )
 
         self.advantage_stream = nn.Sequential(
-            nn.Linear(7 * 7 * 64, 512),
+            nn.Linear(5 * 5 * 256, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
             nn.ReLU(),
             nn.Linear(512, num_actions)
         )
@@ -92,34 +97,3 @@ class DuelingDQN(nn.Module):
         q_values = value + (advantage - advantage.mean(dim=1, keepdim=True))
         return q_values
 
-class DuelingDQN(nn.Module):
-    def __init__(self, in_channels=4, num_actions=4):
-        super(DuelingDQN, self).__init__()
-        self.feature = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=8, stride=4),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU(),
-            nn.Flatten()
-        )
-
-        self.value_stream = nn.Sequential(
-            nn.Linear(7 * 7 * 64, 512),
-            nn.ReLU(),
-            nn.Linear(512, 1)
-        )
-
-        self.advantage_stream = nn.Sequential(
-            nn.Linear(7 * 7 * 64, 512),
-            nn.ReLU(),
-            nn.Linear(512, num_actions)
-        )
-
-    def forward(self, x):
-        x = self.feature(x)
-        value = self.value_stream(x)
-        advantage = self.advantage_stream(x)
-        q_values = value + (advantage - advantage.mean(dim=1, keepdim=True))
-        return q_values

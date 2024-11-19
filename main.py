@@ -44,7 +44,7 @@ def parse():
 def run(args, record_video=False):
     start_time = time.time()
     if args.train_dqn or args.train_dqn_again:
-        env_name = args.env_name or 'BreakoutNoFrameskip-v4'
+        env_name = args.env_name or 'ALE/MsPacman-v5'
         env = Environment(env_name, args, atari_wrapper=True, test=False)
         # env = gym.make("BreakoutNoFrameskip-v4")  # , render_mode="human")
         # env = AtariPreprocessing(env, grayscale_obs=True, scale_obs=True)
@@ -57,7 +57,7 @@ def run(args, record_video=False):
 
     if args.test_dqn:
         render_mode_value = "rgb_array" if record_video else None
-        env = Environment('BreakoutNoFrameskip-v4', args, atari_wrapper=True, test=True, render_mode=render_mode_value)
+        env = Environment('ALE/MsPacman-v5', args, atari_wrapper=True, test=True, render_mode=render_mode_value)
         from agent_dqn import Agent_DQN
         agent = Agent_DQN(env, args)
         test(agent, env, total_episodes=100, record_video=record_video)

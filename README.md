@@ -5,7 +5,12 @@ For our final project, we trained several agents to play Ms. Pacman. We used the
 
 ## Methods
 
-By default, the ALE environment clips rewards to be between -1 and 1. We found that this reward structure doesn't work well with Ms. Pacman, as the default reward mechanism rewards unwanted behaviors and doesn't incentivize
+By default, the ALE environment clips rewards to be between -1 and 1. We found that this reward structure doesn't work well with Ms. Pacman, as the default reward mechanism rewards unwanted behaviors and doesn't properly incentivize the actions that lead to a win. Throughout our experimentation, we found that while the agents did  manage to survive for a while, none of them could beat a level. In order to adjust, we created a new reward scheme that rewards getting pellets and severely punishing death.
+
+| Action | Reward |
+|--------|--------|
+| Collect Pellet | 1 |
+| Lose | -10 |
 
 
 
